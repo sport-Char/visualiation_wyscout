@@ -7,6 +7,9 @@ def heatmap(a):
     for i in a:
         data = []
         for j in a:
+            if i ==0:
+                data.append(np.nan)
+                continue
             data.append(round(j/i,2))
         final_data.append(data)
     return final_data
@@ -18,7 +21,7 @@ uploaded_file = st.sidebar.file_uploader("Choose a file")
 if uploaded_file is not None:
     df = pd.read_excel(io=uploaded_file)
     df = df.fillna(0)
-
+    first_column = df.iloc[:, 0]
     with st.container():
         st.header("Nuage de point")
         st.sidebar.title("Variable pour le nuage de point")
@@ -26,7 +29,7 @@ if uploaded_file is not None:
         choice_y = st.sidebar.selectbox("Axe des Y",df.select_dtypes(["float","int"]).columns)
         aver_x = df[choice_x].mean()
         aver_y = df[choice_y].mean()
-        plot = px.scatter(data_frame = df, x = choice_x, y = choice_y, color = 'Market value' ,text = "Player", hover_name = "Player")
+        plot = px.scatter(data_frame = df, x = choice_x, y = choice_y, color = 'Market value' ,text = first_column, hover_name = first_column)
         plot.update_traces(marker_size=10)
         plot.add_vline(x=aver_x, line_width=1, line_dash="dash")
         plot.add_hline(y=aver_y,line_width=1, line_dash="dash")
@@ -40,7 +43,7 @@ if uploaded_file is not None:
         test = []
         if len(choice_chart) >0:
             for i in choice_chart:
-                test.append(go.Bar(name=i, x=df["Player"], y=df[i]))
+                test.append(go.Bar(name=i, x=first_column, y=df[i]))
 
             fig = go.Figure(data= test
             )
@@ -53,7 +56,7 @@ if uploaded_file is not None:
         st.sidebar.title("Cararctéristique de comparaison pour HeatMap")
         choice_heatmap = st.sidebar.selectbox("Choisir une variable",df.select_dtypes(["float","int"]).columns)
         data = heatmap(df[choice_heatmap] )
-        fig2 = px.imshow(data, x =df["Player"], y =df["Player"], text_auto = True)
+        fig2 = px.imshow(data, x =first_column, y =first_column, text_auto = True)
         st.plotly_chart(fig2)
 
         st.sidebar.title("Radar")
