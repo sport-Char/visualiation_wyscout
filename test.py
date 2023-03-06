@@ -14,6 +14,21 @@ def heatmap(a):
             data.append(round(j/i,2))
         final_data.append(data)
     return final_data
+def getValue(df,player, caract, name):
+    value = []
+    max =[]
+    df_new = df.select_dtypes(["float","int"])
+    scaler = MinMaxScaler()
+    df_scaled = pd.DataFrame(scaler.fit_transform(df_new), columns=df_new.columns)
+    df_scaled[name] = df[name]
+
+    player_row_norm = df_scaled.loc[df_scaled[name] == player]
+    df=df.loc[df_scaled[name] == player]
+    for i in caract:
+        max.append(df[i].values[0])
+        value.append(player_row_norm[i].values[0])
+    return value, max
+
 
 st.title('Visualisation pour le recrutement')
 
@@ -59,7 +74,34 @@ if uploaded_file is not None:
         data = heatmap(df[choice_heatmap] )
         fig2 = px.imshow(data, x =first_column, y =first_column, text_auto = True)
         st.plotly_chart(fig2)
-
+        
+        st.header("Comparaison")
+        st.sidebar.title("Comp")
+        choice_player = st.sidebar.multiselect("Choisir joueur",first_column)
+        choice_caract = st.sidebar.multiselect("Choisir caractéristique",df.select_dtypes(["float","int"]).columns)
+        categories = choice_caract
+        if len(choice_player)>=1 and len(choice_caract)>=3:
+            fig3 = go.Figure()
+            for i in choice_player:
+                value, max = getValue(df, i, categories, name)
+                fig3.add_trace(go.Scatterpolar(
+                    r=value,
+                    theta=categories,
+                    fill='toself',
+                    name=i,
+                    hovertext = max
+                ))
+            fig3.update_layout(
+                polar=dict(
+                radialaxis=dict(
+                visible=True
+            ),
+            ),
+                showlegend=True
+            )
+            st.plotly_chart(fig3)
+        
+        
         st.sidebar.title("Radar")
         radar_file = st.sidebar.file_uploader("Choose a radar file")
         if radar_file is not None:
