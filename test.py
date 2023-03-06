@@ -38,6 +38,7 @@ uploaded_file = st.sidebar.file_uploader("Choose a file")
 if uploaded_file is not None:
     df = pd.read_excel(io=uploaded_file)
     df = df.fillna(0)
+    name  = df.columns[0]
     first_column = df.iloc[:, 0]
     with st.container():
         st.header("Nuage de point")
