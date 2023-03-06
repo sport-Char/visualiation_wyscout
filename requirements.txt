@@ -3,3 +3,4 @@ pandas==1.4.4
 numpy==1.23.2
 plotly==5.13.1
 openpyxl
+scikit-learn
